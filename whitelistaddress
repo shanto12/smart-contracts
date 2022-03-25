@@ -6,7 +6,7 @@ pragma solidity ^0.8.4;
 contract WhiteList {
     constructor() {}
 
-    mapping (address => uint8) public whitelist;
+    mapping (address => uint) public whitelist;
     uint256 public WhitelistCount=0;
 
     event Log(string msg, address _id, uint count, uint addressvalue);
@@ -14,10 +14,19 @@ contract WhiteList {
     function WhitelistAddresses(address[] memory _addresses) public {
         // onlyOwner
         uint256 count=0;
+        uint rand_int;
         for (uint i=0; i<_addresses.length; i++) {
             emit Log("in for loop", _addresses[i], count, whitelist[_addresses[i]]);
             if (whitelist[_addresses[i]] == 0) {
-                whitelist[_addresses[i]]=1;
+                rand_int=random(16);
+                if (rand_int > 11 && rand_int < 16) {
+                whitelist[_addresses[i]]=rand_int % 4 + 2;
+                }
+                else {
+                    whitelist[_addresses[i]]=1;
+                }
+                
+                
                 count +=1;
             }   
             else     {
@@ -48,9 +57,15 @@ contract WhiteList {
         
     }
 
-    function IsWhitelisted(address _address) public view returns (uint8) {                
+    function IsWhitelisted(address _address) public view returns (uint) {                
         return whitelist[_address];        
     }
 
+function random(uint number) public view returns(uint){
+        return uint(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
+        msg.sender))) % number;
+    }
     
-}
+}   
+    
+
