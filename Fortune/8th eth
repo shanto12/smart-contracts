@@ -47,26 +47,29 @@ contract Fortune is ERC1155, Ownable, Pausable, ERC1155Burnable, ERC1155Supply {
     function mint(address _to) 
         external 
         payable
+        onlyOwner
         whenNotPaused        
         onlyWhitelistAddress (_to)        
     {        
-        uint[] memory _ids;
-        _ids[0] = IsWhitelisted(_to);        
-        if (_ids[0] != 1) {
-            _ids[1] = 1;            
-        }        
-        for (uint i=0; i<_ids.length; i++) {
-            require(_ids[i] <= supplies.length && _ids[i] >0, "Token doesn't exist");    
-            uint256 index=_ids[i]-1;
+        uint _id = IsWhitelisted(_to);
 
-            require(minted[index] + 1 <= supplies[index], "Not enough supply");
-            require(msg.value >= rates[index], "Not enough ether sent");
-            // _mint(_to, _ids[i], rates[index], "");
-            // _mint(_to, _ids[i], 1, "");
-            
-            minted[index]++;
-        }
+        require(_id <= supplies.length && _id >0, "Token doesn't exist");    
+        uint256 index=_id-1;
+
+        require(minted[index] + 1 <= supplies[index], "Not enough supply");
+        require(msg.value >= rates[index], "Not enough ether sent");        
+        _mint(_to, _id, 1, "");
         
+        minted[index]++;
+        if (_id !=1)  {
+            uint _eacId = 1;
+
+            require(_eacId <= supplies.length && _eacId >0, "Token doesn't exist");                
+
+            require(minted[_eacId-1] + 1 <= supplies[_eacId-1], "Not enough supply");
+            require(msg.value >= rates[_eacId-1], "Not enough ether sent");            
+            _mint(_to, _eacId, 1, "");        
+        }
         
     }
     function burn(uint _id, uint _amount) external {
